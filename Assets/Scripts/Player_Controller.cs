@@ -2,16 +2,22 @@ using System.Collections;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem; // für neues Input System
 
-public class PlayerController : MonoBehaviour {
-
+public class PlayerController : MonoBehaviour
+{
     public float speed;
     public Text countText;
     public Text winText;
+    public Text timerText;
 
     private Rigidbody rb;
 
     private int count;
+    public float timeLeft = 10.0f;
+
+    // Neue Input System Variable für Bewegung
+    private Vector2 movementInput;
 
     void Start()
     {
@@ -21,13 +27,18 @@ public class PlayerController : MonoBehaviour {
         winText.text = "";
     }
 
+    // Neue Input System Callback
+   public void OnMove(InputAction.CallbackContext context)
+{
+    movementInput = context.ReadValue<Vector2>();
+    Debug.Log("Move Input: " + movementInput);
+}
+
+
     void FixedUpdate()
     {
-        float moveHorizontal = Input.GetAxis("Horizontal");
-        float moveVertical = Input.GetAxis("Vertical");
-
-        Vector3 movement = new Vector3(moveHorizontal, 0.0f, moveVertical);
-
+        // Bewegung jetzt über movementInput statt Input.GetAxis
+        Vector3 movement = new Vector3(movementInput.x, 0.0f, movementInput.y);
         rb.AddForce(movement * speed);
     }
 
@@ -38,6 +49,8 @@ public class PlayerController : MonoBehaviour {
             other.gameObject.SetActive(false);
             count = count + 1;
             SetCountText();
+            SizeGrowOnPickup();
+            ChangeColor();
         }
     }
 
@@ -48,5 +61,39 @@ public class PlayerController : MonoBehaviour {
         {
             winText.text = "You Win!";
         }
+    }
+
+    void SetTimerText()
+    {
+        timerText.text = "Time Left: " + Mathf.Round(timeLeft).ToString();
+        if (timeLeft < 0)
+        {
+            winText.text = "You Lose!";
+        }
+    }
+
+    void Timer()
+    {
+        timeLeft -= Time.deltaTime;
+        if (timeLeft < 0)
+        {
+            winText.text = "You Lose!";
+            Destroy(this);
+        }
+    }
+
+    void Update()
+    {
+        Timer();
+    }
+
+    void ChangeColor()
+    {
+        GetComponent<Renderer>().material.color = new Color(Random.value, Random.value, Random.value);
+    }
+
+    void SizeGrowOnPickup()
+    {
+        transform.localScale += new Vector3(0.1f, 0.1f, 0.1f);
     }
 }
