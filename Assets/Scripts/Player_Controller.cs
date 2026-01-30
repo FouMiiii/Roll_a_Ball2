@@ -10,7 +10,8 @@ public class PlayerController : MonoBehaviour
     public Text countText;
     public Text winText;
     public Text timerText;
-
+    private float movementX;
+    private float movementY;
     private Rigidbody rb;
 
     private int count;
@@ -28,17 +29,18 @@ public class PlayerController : MonoBehaviour
     }
 
     // Neue Input System Callback
-   public void OnMove(InputAction.CallbackContext context)
-{
-    movementInput = context.ReadValue<Vector2>();
-    Debug.Log("Move Input: " + movementInput);
-}
+    // This function is called when a move input is detected.
+    void OnMove(InputValue movementValue) {
+        Vector2 movementVector = movementValue.Get<Vector2>(); // Convert the input value into a Vector2 for movement.
+        movementX = movementVector.x;  // Store the X and Y components of the movement.
+        movementY = movementVector.y;
+    }
 
 
     void FixedUpdate()
     {
         // Bewegung jetzt über movementInput statt Input.GetAxis
-        Vector3 movement = new Vector3(movementInput.x, 0.0f, movementInput.y);
+        Vector3 movement = new Vector3(movementX, 0.0f, movementY);
         rb.AddForce(movement * speed);
     }
 
@@ -85,6 +87,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         Timer();
+        print("Move Y: " + movementY);
     }
 
     void ChangeColor()
